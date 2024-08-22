@@ -2,49 +2,31 @@ import streamlit as st
 import cv2
 import numpy as np
 from PIL import Image
-import io
 
-def capture_image():
-    # Create a webcam capture object
-    cap = cv2.VideoCapture(1)
-    if not cap.isOpened():
-        st.error("Could not open webcam.")
-        return None
+st.title("Live Webcam Stream")
 
-    # Read a frame from the webcam
-    ret, frame = cap.read()
-    cap.release()
+# Set up the webcam
+cap = cv2.VideoCapture(0)
 
-    if not ret:
-        st.error("Could not read frame from webcam.")
-        return None
+if not cap.isOpened():
+    st.error("Error: Unable to access the webcam.")
+else:
+    stframe = st.empty()  # Create an empty placeholder for the video frame
 
-    # Convert frame from BGR to RGB
-    frame_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-    return frame_rgb
+    while True:
+        ret, frame = cap.read()  # Capture frame-by-frame
 
-def main():
-    st.title("Webcam Capture and Download")
+        if not ret:
+            st.error("Error: Unable to read from the webcam.")
+            break
 
-    if st.button("Capture Image"):
-        image = capture_image()
-        if image is not None:
-            # Display the image
-            st.image(image, channels="RGB")
+        # Convert the frame to RGB format
+        frame_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
 
-            # Convert image to a PIL image for downloading
-            pil_image = Image.fromarray(image)
-            buffered = io.BytesIO()
-            pil_image.save(buffered, format="PNG")
-            img_str = buffered.getvalue()
+        # Convert to PIL image
+        img = Image.fromarray(frame_rgb)
 
-            # Create a download button
-            st.download_button(
-                label="Download Image",
-                data=img_str,
-                file_name="captured_image.png",
-                mime="image/png"
-            )
+        # Display the image in Streamlit
+        stframe.image(img, use_column_width=True)
 
-if __name__ == "__main__":
-    main()
+cap.release()
