@@ -6,7 +6,7 @@ import io
 
 def capture_image():
     # Create a webcam capture object
-    cap = cv2.VideoCapture(0)
+    cap = cv2.VideoCapture(1)
     if not cap.isOpened():
         st.error("Could not open webcam.")
         return None
